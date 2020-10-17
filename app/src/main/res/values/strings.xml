@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Images</string>
+    <string name="error_loading_image">Some problems with loading image</string>
+    <string name="loading_image">Loading image...</string>
+</resources>
