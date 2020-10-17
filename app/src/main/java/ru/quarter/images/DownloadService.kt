@@ -20,6 +20,7 @@ class DownloadService : IntentService("DownloadImages") {
     val images: MutableMap<String, Bitmap> = ConcurrentHashMap()
 
     override fun onHandleIntent(intent: Intent?) {
+        Log.i("INTENT", "Started handling!")
         val url = intent!!.getStringExtra("url")!!
         if (images.containsKey(url)) {
             Log.w("Duplicated request", "Request duplication on $url")
@@ -35,13 +36,12 @@ class DownloadService : IntentService("DownloadImages") {
                     .putExtra("url", url)
             )
         } catch (e: Exception) {
-            Log.e("Error on image download", e.message!!)
+            Log.e("ERR DOWNLOAD", "Oops...   :/")
             e.printStackTrace()
         }
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-        onHandleIntent(intent)
         return DownloadBinder()
     }
 

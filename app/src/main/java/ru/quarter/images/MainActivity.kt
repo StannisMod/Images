@@ -2,6 +2,8 @@ package ru.quarter.images
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
@@ -9,13 +11,17 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    val previews: MutableList<ImageEntry> = ArrayList()
+    var previews: MutableList<ImageEntry> = ArrayList()
     var ready = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        DownloadImageTask(this).execute("https://picsum.photos/v2/list?limit=10")
+    }
+
+    fun updatePreview() {
         val viewManager = LinearLayoutManager(this)
         previewRecycler.apply {
             layoutManager = viewManager
@@ -27,7 +33,40 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
 
-        DownloadImageTask(this).execute("https://picsum.photos/v2/list?limit=10")
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putParcelable("previews", Storage(previews))
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        previews = savedInstanceState.getParcelable<Storage>("previews")!!.list
+    }
+
+    class Storage(val list: MutableList<ImageEntry>) : Parcelable {
+
+        constructor() : this(ArrayList())
+
+        override fun writeToParcel(parcel: Parcel, flags: Int) {
+            parcel.writeList(list)
+        }
+
+        override fun describeContents(): Int {
+            return list.size
+        }
+
+        companion object CREATOR : Parcelable.Creator<Storage> {
+            override fun createFromParcel(parcel: Parcel): Storage {
+                val list = ArrayList<ImageEntry>()
+                parcel.readList(list, List::class.java.classLoader)
+                return Storage(list)
+            }
+
+            override fun newArray(size: Int): Array<Storage?> {
+                return Array(size) { Storage() }
+            }
+        }
     }
 }

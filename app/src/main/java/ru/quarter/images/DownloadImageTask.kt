@@ -36,5 +36,6 @@ open class DownloadImageTask(private val mainActivity: MainActivity) : AsyncTask
     override fun onPostExecute(result: List<ImageEntry>) {
         mainActivity.previews.addAll(result)
         mainActivity.ready = true
+        mainActivity.updatePreview()
     }
 }

@@ -4,16 +4,11 @@
     android:orientation="vertical"
     android:layout_height="80dp">
 
-    <ImageView
-        android:id="@+id/image"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:contentDescription="@string/error_loading_image" />
-
     <TextView
         android:id="@+id/description"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:text="@string/just_default_text" />
 
 </LinearLayout>
