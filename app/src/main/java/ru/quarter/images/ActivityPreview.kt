@@ -14,6 +14,7 @@ class ActivityPreview : AppCompatActivity() {
 
     private lateinit var service: DownloadService
     private var bound = false
+    private lateinit var mReceiver: BroadcastReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,7 +23,8 @@ class ActivityPreview : AppCompatActivity() {
 
         val filter = IntentFilter()
         filter.addCategory(DownloadService.action_intent)
-        registerReceiver(MainBroadcastReceiver(), filter)
+        mReceiver = MainBroadcastReceiver()
+        registerReceiver(mReceiver, filter)
 
         bindService(
             Intent(this, DownloadService::class.java)
@@ -30,6 +32,11 @@ class ActivityPreview : AppCompatActivity() {
             mConnection,
             Context.BIND_AUTO_CREATE
         )
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(mReceiver)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -44,16 +51,19 @@ class ActivityPreview : AppCompatActivity() {
         super.onRestoreInstanceState(savedInstanceState)
         url = savedInstanceState.getString("url")!!
         image = savedInstanceState.getParcelable("image")
+        preview.setImageBitmap(image)
     }
 
     private val mConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, mbinder: IBinder) {
             val binder: DownloadService.DownloadBinder = mbinder as DownloadService.DownloadBinder
+            println("Service connected")
             service = binder.getDownloadService()
             bound = true
         }
 
         override fun onServiceDisconnected(className: ComponentName) {
+            println("Service disconnected")
             bound = false
         }
     }

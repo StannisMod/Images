@@ -24,7 +24,7 @@ open class DownloadImageTask(private val mainActivity: MainActivity) : AsyncTask
             json.forEach {
                 result.add(ImageEntry(
                     it.asJsonObject.get("author").asString,
-                    it.asJsonObject.get("url").asString))
+                    it.asJsonObject.get("download_url").asString))
             }
         } catch (e: Exception) {
             Log.e("Error on fetching data", e.message!!)

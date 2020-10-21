@@ -37,11 +37,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
+        outState.putBoolean("ready", ready)
         outState.putParcelable("previews", Storage(previews))
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
+        ready = savedInstanceState.getBoolean("ready")
         previews = savedInstanceState.getParcelable<Storage>("previews")!!.list
     }
 
