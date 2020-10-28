@@ -21,12 +21,12 @@ class DownloadService : Service() {
     val images: MutableMap<String, Bitmap> = ConcurrentHashMap()
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        DownloadTask().execute(intent.getStringExtra("url"))
+        DownloadTask(this).execute(intent.getStringExtra("url"))
         return START_STICKY
     }
 
     override fun onBind(intent: Intent): IBinder? {
-        DownloadTask().execute(intent.getStringExtra("url"))
+        DownloadTask(this).execute(intent.getStringExtra("url"))
         return DownloadBinder()
     }
 
@@ -34,29 +34,21 @@ class DownloadService : Service() {
         fun getDownloadService() = this@DownloadService
     }
 
-    inner class DownloadTask : AsyncTask<String, Unit, Bitmap>() {
+    class DownloadTask(private val service: DownloadService) : AsyncTask<String, Unit, Bitmap>() {
 
         private lateinit var url: String
 
         override fun doInBackground(vararg params: String?): Bitmap {
             Log.i("INTENT", "Started handling!")
             url = params[0]!!
-            if (images.containsKey(url)) {
+            if (service.images.containsKey(url)) {
                 Log.w("Duplicated request", "Request duplication on $url")
-                return images[url]!!
+                return service.images[url]!!
             }
             try {
                 println(url)
                 val stream: InputStream = URL(url).openStream()
-                val image = BitmapFactory.decodeStream(stream)
-                sendBroadcast(
-                    Intent()
-                        .setAction(action_intent)
-                        .addCategory(Intent.CATEGORY_DEFAULT)
-                        .putExtra("url", url)
-                )
-                println("Broadcast sent")
-                return image
+                return BitmapFactory.decodeStream(stream)
             } catch (e: Exception) {
                 Log.e("ERR DOWNLOAD", "Oops...   :/")
                 e.printStackTrace()
@@ -66,7 +58,13 @@ class DownloadService : Service() {
 
         override fun onPostExecute(result: Bitmap) {
             super.onPostExecute(result)
-            images[url] = result
+            service.images[url] = result
+            service.sendBroadcast(
+                Intent()
+                    .setAction(action_intent)
+                    .putExtra("url", url)
+            )
+            println("Broadcast sent")
         }
     }
 }

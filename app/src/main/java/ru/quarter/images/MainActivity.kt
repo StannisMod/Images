@@ -18,7 +18,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        DownloadImageTask(this).execute("https://picsum.photos/v2/list?limit=10")
+        if (savedInstanceState == null) {
+            DownloadImageTask(this).execute("https://picsum.photos/v2/list?limit=10")
+        }
     }
 
     fun updatePreview() {
@@ -45,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         super.onRestoreInstanceState(savedInstanceState)
         ready = savedInstanceState.getBoolean("ready")
         previews = savedInstanceState.getParcelable<Storage>("previews")!!.list
+        updatePreview()
     }
 
     class Storage(val list: MutableList<ImageEntry>) : Parcelable {

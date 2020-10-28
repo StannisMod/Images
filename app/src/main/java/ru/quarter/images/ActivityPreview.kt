@@ -22,7 +22,7 @@ class ActivityPreview : AppCompatActivity() {
         url = intent.getStringExtra("url")!!
 
         val filter = IntentFilter()
-        filter.addCategory(DownloadService.action_intent)
+        filter.addAction(DownloadService.action_intent)
         mReceiver = MainBroadcastReceiver()
         registerReceiver(mReceiver, filter)
 
