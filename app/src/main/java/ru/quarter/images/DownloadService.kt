@@ -9,6 +9,7 @@ import android.os.Binder
 import android.os.IBinder
 import android.util.Log
 import java.io.InputStream
+import java.lang.ref.WeakReference
 import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 
@@ -21,12 +22,12 @@ class DownloadService : Service() {
     val images: MutableMap<String, Bitmap> = ConcurrentHashMap()
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
-        DownloadTask(this).execute(intent.getStringExtra("url"))
+        DownloadTask(WeakReference(this)).execute(intent.getStringExtra("url"))
         return START_STICKY
     }
 
-    override fun onBind(intent: Intent): IBinder? {
-        DownloadTask(this).execute(intent.getStringExtra("url"))
+    override fun onBind(intent: Intent): IBinder {
+        DownloadTask(WeakReference(this)).execute(intent.getStringExtra("url"))
         return DownloadBinder()
     }
 
@@ -34,16 +35,16 @@ class DownloadService : Service() {
         fun getDownloadService() = this@DownloadService
     }
 
-    class DownloadTask(private val service: DownloadService) : AsyncTask<String, Unit, Bitmap>() {
+    class DownloadTask(private val service: WeakReference<DownloadService>) : AsyncTask<String, Unit, Bitmap>() {
 
         private lateinit var url: String
 
         override fun doInBackground(vararg params: String?): Bitmap {
             Log.i("INTENT", "Started handling!")
             url = params[0]!!
-            if (service.images.containsKey(url)) {
+            if (service.get()?.images?.containsKey(url) == true) {
                 Log.w("Duplicated request", "Request duplication on $url")
-                return service.images[url]!!
+                return service.get()!!.images[url]!!
             }
             try {
                 println(url)
@@ -58,8 +59,8 @@ class DownloadService : Service() {
 
         override fun onPostExecute(result: Bitmap) {
             super.onPostExecute(result)
-            service.images[url] = result
-            service.sendBroadcast(
+            service.get()?.images?.set(url, result)
+            service.get()?.sendBroadcast(
                 Intent()
                     .setAction(action_intent)
                     .putExtra("url", url)

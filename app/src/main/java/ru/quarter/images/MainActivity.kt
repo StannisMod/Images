@@ -1,6 +1,7 @@
 package ru.quarter.images
 
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
@@ -13,13 +14,14 @@ class MainActivity : AppCompatActivity() {
 
     var previews: MutableList<ImageEntry> = ArrayList()
     var ready = false
+    var getImagesTask : AsyncTask<String, Unit, List<ImageEntry>>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         if (savedInstanceState == null) {
-            DownloadImageTask(this).execute("https://picsum.photos/v2/list?limit=10")
+            getImagesTask = DownloadImageTask(this).execute("https://picsum.photos/v2/list?limit=10")
         }
     }
 
@@ -48,6 +50,11 @@ class MainActivity : AppCompatActivity() {
         ready = savedInstanceState.getBoolean("ready")
         previews = savedInstanceState.getParcelable<Storage>("previews")!!.list
         updatePreview()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        getImagesTask?.cancel(true)
     }
 
     class Storage(val list: MutableList<ImageEntry>) : Parcelable {

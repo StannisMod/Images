@@ -68,8 +68,6 @@ class ActivityPreview : AppCompatActivity() {
         }
     }
 
-    // BROADCAST не работает, так и не понял, почему. Остальное должно работать, поставьте пожалуйста delay ^)
-
     inner class MainBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             println("Received!!!")
